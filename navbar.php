@@ -13,6 +13,8 @@
 				<a href="index.php?page=product" class="nav-item nav-product"><span class='icon-field'><i class="fa fa-boxes"></i></span> Product List</a>
 				<a href="index.php?page=supplier" class="nav-item nav-supplier"><span class='icon-field'><i class="fa fa-truck-loading"></i></span> Supplier List</a>
 				<a href="index.php?page=customer" class="nav-item nav-customer"><span class='icon-field'><i class="fa fa-user-friends"></i></span> Customer List</a>
+				<a href="index.php?page=purchase_order" class="nav-item nav-customer"><span class='icon-field'><i class="fa fa-user-friends"></i></span> Purchase Order</a>
+				
 				
 				<?php if($_SESSION['login_type'] == 1): ?>
 				<a href="index.php?page=users" class="nav-item nav-users"><span class='icon-field'><i class="fa fa-users"></i></span> Users</a>
