@@ -22,6 +22,10 @@ $query = $conn->query("SELECT * FROM system_settings limit 1")->fetch_array();
 		}
 ?>
 
+  <link rel="stylesheet" href="assets/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/venobox/venobox.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <style>
 	body{
@@ -99,6 +103,9 @@ $query = $conn->query("SELECT * FROM system_settings limit 1")->fetch_array();
 
 
 </body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="assets/js/select2.min.js"></script>
+
 <script>
 	$('#login-form').submit(function(e){
 		e.preventDefault()
