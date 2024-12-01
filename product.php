@@ -34,6 +34,17 @@
 					</div>
 					<div class="card-body">
 							<div class="form-group">
+								<label class="control-label">Supplier</label>
+								<select name="supplier_id" id="" class="custom-select browser-default">
+								<?php 
+								$suppliers = $conn->query("SELECT * FROM supplier_list ORDER BY supplier_name ASC");
+								while($row = $suppliers->fetch_assoc()):
+								?>
+									<option value="<?php echo $row['id'] ?>"><?php echo $row['supplier_name'] ?></option>
+								<?php endwhile; ?>
+								</select>
+							</div>
+							<div class="form-group">
 								<label class="control-label">Category</label>
 								<select name="category_id" id="" class="custom-select browser-default">
 								<?php 
@@ -87,8 +98,8 @@
 							<tbody>
 								<?php 
 								$i = 1;
-								$prod = $conn->query("SELECT * FROM product_list order by id asc");
-								while($row=$prod->fetch_assoc()):
+								$prod = $conn->query("SELECT p.*, s.supplier_name FROM product_list p LEFT JOIN supplier_list s ON p.supplier = s.id ORDER BY p.id ASC");
+								while($row = $prod->fetch_assoc()):
 								?>
 								<tr>
 									<td class="text-center"><?php echo $i++ ?></td>
@@ -98,6 +109,7 @@
 										<p><small>Name : <b><?php echo $row['name'] ?></b></small></p>
 										<p><small>Description : <b><?php echo $row['description'] ?></b></small></p>
 										<p><small>Price : <b><?php echo number_format($row['price'],2) ?></b></small></p>
+										<p><small>Supplier : <b><?php echo $row['supplier_name'] ?></b></small></p>
 									</td>
 									<td class="text-center">
 										<button class="btn btn-sm btn-primary edit_product" type="button" data-id="<?php echo $row['id'] ?>" data-name="<?php echo $row['name'] ?>" data-sku="<?php echo $row['sku'] ?>" data-category_id="<?php echo $row['category_id'] ?>" data-description="<?php echo $row['description'] ?>" data-price="<?php echo $row['price'] ?>" >Edit</button>

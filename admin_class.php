@@ -166,6 +166,7 @@ Class Action {
 		$data = " name = '$name' ";
 		$data .= ", sku = '$sku' ";
 		$data .= ", category_id = '$category_id' ";
+		$data .= ", supplier = '$supplier_id' ";
 		$data .= ", description = '$description' ";
 		$data .= ", price = '$price' ";
 
