@@ -2,7 +2,7 @@
 <div class="container-fluid">
 	<div class="col-lg-12">
 		<div class="row">
-			<button class="col-md-2 float-right btn btn-primary btn-sm" id="new_sales"><i class="fa fa-plus"></i> New Sales</button>
+			<button class="col-md-2 float-right btn btn-primary btn-sm" id="new_purchase_order"><i class="fa fa-plus"></i> New Purchase Order</button>
 		</div>
 		<div class="row">
 			<div class="col-md-12">
@@ -53,8 +53,8 @@
 
 <script>
 	$('table').dataTable()
-	$('#new_sales').click(function(){
-		location.href = "index.php?page=pos"
+	$('#new_purchase_order').click(function(){
+		location.href = "index.php?page=new_po"
 	})
 	$('.delete_sales').click(function(){
 		_conf("Are you sure to delete this data?","delete_sales",[$(this).attr('data-id')])
