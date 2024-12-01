@@ -45,8 +45,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'login') {
 }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -76,30 +74,12 @@ if (isset($_GET['action']) && $_GET['action'] == 'login') {
       display: flex;
       align-items: center;
     }
-
-    #login-left {
-      position: absolute;
-      left: 0;
-      width: 60%;
-      height: 100%;
-      background: #00000061;
-      display: flex;
-      align-items: center;
-    }
-
-    #login-right .card {
-      margin: auto
-    }
-
-    .logo {
-      margin: auto;
-      font-size: 8rem;
-      background: white;
-      padding: .5em 0.8em;
-      border-radius: 50%;
-      color: #000000b3;
-    }
   </style>
+
+  <link rel="stylesheet" href="assets/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/venobox/venobox.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
@@ -157,6 +137,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'login') {
       });
     });
   </script>
+  <script src="assets/js/select2.min.js"></script>
 </body>
 
 </html>
