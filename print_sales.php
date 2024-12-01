@@ -45,6 +45,15 @@ $product = $conn->query("SELECT * FROM product_list  order by name asc");
 			#uni_modal .modal-footer{
 				display: none;
 			}
+
+			@media print {
+    @page {
+      margin: 10px; /* Removes default margin */
+    }
+    body {
+      margin: 50px; /* Removes body margins */
+    }
+  }
 	</style>
 	<table width="100%">
 			
@@ -131,15 +140,8 @@ $product = $conn->query("SELECT * FROM product_list  order by name asc");
 
 </div>
 <hr>
-<div class="text-right">
-	<div class="col-md-12">
-		<div class="row">
-			<button type="button" class="btn btn-sm btn-primary" id="print"><i class="fa fa-print"></i> Print</button>
-        	<button type="button" class="btn btn-sm btn-secondary"  onclick="location.reload()"><i class="fa fa-plus"></i> New Sales</button>
 
-		</div>
-	</div>
-</div>
+
 
 <script>
 	$('#print').click(function(){

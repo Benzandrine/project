@@ -35,8 +35,9 @@
 									<td class=""><?php echo isset($cus_arr[$row['customer_id']])? $cus_arr[$row['customer_id']] :'N/A' ?></td>
 									<td class="text-center">
 										
-										<a class="btn btn-sm btn-primary" href="index.php?page=pos2&id=<?php echo $row['id'] ?>&customer_id=<?php echo $row['customer_id'] ?>">Edit</a>
+										<a class="btn btn-sm btn-primary" href="index.php?page=pos2&id=<?php echo $row['id'] ?>&customer_id=<?php echo $row['customer_id'] ?>">View</a>
 										<a class="btn btn-sm btn-danger delete_sales" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">Delete</a>
+										<a class="btn btn-sm btn-success print_receipt" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>"><i class="fa fa-print"></i> Print</a>
 									</td>
 								</tr>
 							<?php endwhile; ?>
@@ -48,7 +49,7 @@
 		</div>
 	</div>
 </div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
 <script>
 	$('table').dataTable()
@@ -75,4 +76,18 @@
 			}
 		})
 	}
+// Print button functionality without PDF save option
+$('.print_receipt').click(function(){
+    let salesId = $(this).attr('data-id');
+
+    // Open print window for the receipt
+    let newWindow = window.open('print_sales.php?id=' + salesId, '_blank', 'width=700,height=600,scrollbars=yes,resizable=yes');
+
+    // Trigger print dialog once the print page loads
+    newWindow.onload = function () {
+        newWindow.print(); // Open the print dialog
+        setTimeout(() => { newWindow.close(); }, 1500); // Close the window after 1.5 seconds
+    };
+});
+
 </script>
