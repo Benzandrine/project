@@ -34,7 +34,8 @@
 									<td class=""><?php echo $row['ref_no'] ?></td>
 									<td class=""><?php echo isset($cus_arr[$row['customer_id']])? $cus_arr[$row['customer_id']] :'N/A' ?></td>
 									<td class="text-center">
-										<a class="btn btn-sm btn-primary" href="index.php?page=pos&id=<?php echo $row['id'] ?>">Edit</a>
+										
+										<a class="btn btn-sm btn-primary" href="index.php?page=pos2&id=<?php echo $row['id'] ?>&customer_id=<?php echo $row['customer_id'] ?>">Edit</a>
 										<a class="btn btn-sm btn-danger delete_sales" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">Delete</a>
 									</td>
 								</tr>
