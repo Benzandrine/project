@@ -1,130 +1,162 @@
+<?php
+session_start();
+$conn = new mysqli('localhost', 'root', '', 'sales_inventory_db');
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Handle login
+if (isset($_GET['action']) && $_GET['action'] == 'login') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Prepared statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->bind_param('s', $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+
+        // Verify the password
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_type'] = $user['type'];
+            $_SESSION['username'] = $user['username'];
+
+            if ($user['type'] == 1) {
+                echo 1; // Admin
+            } elseif ($user['type'] == 2) {
+                echo 2; // Cashier
+            }
+        } else {
+            echo 0; // Invalid password
+        }
+    } else {
+        echo 0; // User not found
+    }
+
+    $stmt->close();
+    $conn->close();
+    exit;
+}
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
   <title>Admin | Groceries Sales and Inventory System</title>
- 	
+  <style>
+    body {
+      width: 100%;
+      height: 100%;
+      background: #007bff;
+    }
 
-<?php include('./header.php'); ?>
-<?php include('./db_connect.php'); ?>
-<?php 
-session_start();
-if(isset($_SESSION['login_id']))
-header("location:index.php?page=home");
+    main#main {
+      width: 100%;
+      height: 100%;
+      background: white;
+    }
 
-$query = $conn->query("SELECT * FROM system_settings limit 1")->fetch_array();
-		foreach ($query as $key => $value) {
-			if(!is_numeric($key))
-				$_SESSION['setting_'.$key] = $value;
-		}
-?>
+    #login-right {
+      position: absolute;
+      right: 0;
+      width: 40%;
+      height: 100%;
+      background: white;
+      display: flex;
+      align-items: center;
+    }
 
+    #login-left {
+      position: absolute;
+      left: 0;
+      width: 60%;
+      height: 100%;
+      background: #00000061;
+      display: flex;
+      align-items: center;
+    }
+
+    #login-right .card {
+      margin: auto
+    }
+
+    .logo {
+      margin: auto;
+      font-size: 8rem;
+      background: white;
+      padding: .5em 0.8em;
+      border-radius: 50%;
+      color: #000000b3;
+    }
+  </style>
 </head>
-<style>
-	body{
-		width: 100%;
-	    height: calc(100%);
-	    /*background: #007bff;*/
-	}
-	main#main{
-		width:100%;
-		height: calc(100%);
-		background:white;
-	}
-	#login-right{
-		position: absolute;
-		right:0;
-		width:40%;
-		height: calc(100%);
-		background:white;
-		display: flex;
-		align-items: center;
-	}
-	#login-left{
-		position: absolute;
-		left:0;
-		width:60%;
-		height: calc(100%);
-		background:#00000061;
-		display: flex;
-		align-items: center;
-	}
-	#login-right .card{
-		margin: auto
-	}
-	.logo {
-    margin: auto;
-    font-size: 8rem;
-    background: white;
-    padding: .5em 0.8em;
-    border-radius: 50% 50%;
-    color: #000000b3;
-}
-</style>
 
 <body>
-
-
-  <main id="main" class=" bg-dark">
-  		<div id="login-left">
-  			<div class="logo">
-  				<span class="fa fa-coins"></span>
-  			</div>
-  		</div>
-  		<div id="login-right">
-  			<div class="card col-md-8">
-  				<div class="card-body">
-  					<form id="login-form" >
-  						<div class="form-group">
-  							<label for="username" class="control-label">Username</label>
-  							<input type="text" id="username" name="username" class="form-control">
-  						</div>
-  						<div class="form-group">
-  							<label for="password" class="control-label">Password</label>
-  							<input type="password" id="password" name="password" class="form-control">
-  						</div>
-  						<center><button class="btn-sm btn-block btn-wave col-md-4 btn-primary">Login</button></center>
-  					</form>
-  				</div>
-  			</div>
-  		</div>
-   
-
+  <main id="main" class="bg-dark">
+    <div id="login-left">
+      <div class="logo">
+        <span class="fa fa-coins"></span>
+      </div>
+    </div>
+    <div id="login-right">
+      <div class="card col-md-8">
+        <div class="card-body">
+          <form id="login-form">
+            <div class="form-group">
+              <label for="username" class="control-label">Username</label>
+              <input type="text" id="username" name="username" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="password" class="control-label">Password</label>
+              <input type="password" id="password" name="password" class="form-control">
+            </div>
+            <center><button type="submit" class="btn btn-primary btn-sm btn-block col-md-4">Login</button></center>
+          </form>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $('#login-form').submit(function(e) {
+      e.preventDefault();
+      const form = $(this);
+      form.find('button').attr('disabled', true).text('Logging in...');
+      form.find('.alert-danger').remove();
 
-
+      $.ajax({
+        url: 'ajax.php?action=login',
+        method: 'POST',
+        data: form.serialize(),
+        success: function(response) {
+          if (response == 1) {
+            location.href = 'index.php?page=home'; // Admin dashboard
+          } else if (response == 2) {
+            location.href = 'cashier.php'; // Cashier dashboard
+          } else {
+            form.prepend('<div class="alert alert-danger">Username or password is incorrect.</div>');
+          }
+          form.find('button').removeAttr('disabled').text('Login');
+        },
+        error: function(err) {
+          console.error(err);
+          form.find('button').removeAttr('disabled').text('Login');
+        }
+      });
+    });
+  </script>
 </body>
-<script>
-	$('#login-form').submit(function(e){
-		e.preventDefault()
-		$('#login-form button[type="button"]').attr('disabled',true).html('Logging in...');
-		if($(this).find('.alert-danger').length > 0 )
-			$(this).find('.alert-danger').remove();
-		$.ajax({
-			url:'ajax.php?action=login',
-			method:'POST',
-			data:$(this).serialize(),
-			error:err=>{
-				console.log(err)
-		$('#login-form button[type="button"]').removeAttr('disabled').html('Login');
 
-			},
-			success:function(resp){
-				if(resp == 1){
-					location.href ='index.php?page=home';
-				}else if(resp == 2){
-					location.href ='voting.php';
-				}else{
-					$('#login-form').prepend('<div class="alert alert-danger">Username or password is incorrect.</div>')
-					$('#login-form button[type="button"]').removeAttr('disabled').html('Login');
-				}
-			}
-		})
-	})
-</script>	
 </html>
