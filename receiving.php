@@ -69,7 +69,6 @@
 									<td class=""><?php echo $row['ref_no'] ?></td>
 									<td class=""><?php echo isset($sup_arr[$row['supplier_id']])? $sup_arr[$row['supplier_id']] :'N/A' ?></td>
 									<td class="text-center">
-										
 										<a class="btn btn-sm btn-danger delete_receiving" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">Delete</a>
 										<a class="btn btn-sm btn-info" href="index.php?page=view_receiving&id=<?php echo $row['id'] ?>">View</a>
 										<a class="btn btn-sm btn-success preview_pdf" href="javascript:void(0)" data-id="<?php echo $row['id']; ?>"><i class="fa fa-print"></i> Print</a>
@@ -77,6 +76,7 @@
 								</tr>
 							<?php endwhile; ?>
 							</tbody>
+							
 						</table>
 					</div>
 				</div>
@@ -161,33 +161,32 @@
         });
     });
 
+    $('table').dataTable()
+    $('#new_receiving').click(function(){
+        $('#supplierModal').modal('show'); // Show the modal
+    })
+    $('.select_supplier').click(function(){
+        let supplierId = $(this).attr('data-id');
+        location.href = "index.php?page=manage_receiving&supplier_id=" + supplierId; // Redirect with supplier ID
+    })
+    $('.delete_receiving').click(function(){
+        _conf("Are you sure to delete this data?","delete_receiving",[$(this).attr('data-id')])
+    })
+    function delete_receiving($id){
+        start_load()
+        $.ajax({
+            url:'ajax.php?action=delete_receiving',
+            method:'POST',
+            data:{id:$id},
+            success:function(resp){
+                if(resp==1){
+                    alert_toast("Data successfully deleted",'success')
+                    setTimeout(function(){
+                        location.reload()
+                    },1500)
 
-	$('table').dataTable()
-	$('#new_receiving').click(function(){
-		$('#supplierModal').modal('show'); // Show the modal
-	})
-	$('.select_supplier').click(function(){
-		let supplierId = $(this).attr('data-id');
-		location.href = "index.php?page=manage_receiving&supplier_id=" + supplierId; // Redirect with supplier ID
-	})
-	$('.delete_receiving').click(function(){
-		_conf("Are you sure to delete this data?","delete_receiving",[$(this).attr('data-id')])
-	})
-	function delete_receiving($id){
-		start_load()
-		$.ajax({
-			url:'ajax.php?action=delete_receiving',
-			method:'POST',
-			data:{id:$id},
-			success:function(resp){
-				if(resp==1){
-					alert_toast("Data successfully deleted",'success')
-					setTimeout(function(){
-						location.reload()
-					},1500)
-
-				}
-			}
-		})
-	}
+                }
+            }
+        })
+    }
 </script>

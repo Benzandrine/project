@@ -11,6 +11,7 @@ if (isset($_GET['id'])) {
 
 $total_qty = 0;
 $total_price = 0;
+$tax_rate = 0.12; // 12% tax rate
 ?>
 
 <div class="container-fluid" id="print-receiving">
@@ -82,7 +83,6 @@ $total_price = 0;
                     <th class="wborder">Product Name</th>
                     <th class="wborder">Quantity</th>
                     <th class="wborder">Price</th>
-                    <th class="wborder">Tax</th>
                 </tr>
                 <?php 
                 while ($row = $inv->fetch_assoc()): 
@@ -90,7 +90,6 @@ $total_price = 0;
                     $other_details = json_decode($row['other_details'], true);
                     $price = $other_details['price'];
                     $qty = $row['qty'];
-                    $tax = $row['tax'] * 100; // Tax in percentage
                     $total_qty += $qty;
                     $total_price += $price * $qty;
                 ?>
@@ -98,17 +97,27 @@ $total_price = 0;
                     <td class="wborder"><?php echo $product['name']; ?></td>
                     <td class="wborder text-center"><?php echo $qty; ?></td>
                     <td class="wborder text-right"><?php echo number_format($price, 2); ?></td>
-                    <td class="wborder text-center"><?php echo number_format($tax, 2) . '%'; ?></td>
                 </tr>
-                <?php endwhile; ?>
+                <?php endwhile; 
+                $total_tax = $total_price * $tax_rate; // Total tax for the entire receipt
+                $grand_total = $total_price + $total_tax; // Grand total including tax
+                ?>
                 <tr>
                     <th class="text-right wborder" colspan="1">Total Quantity</th>
                     <th class="text-center wborder"><?php echo $total_qty; ?></th>
-                    <th class="wborder" colspan="2"></th>
+                    <th class="wborder"></th>
                 </tr>
                 <tr>
-                    <th class="text-right wborder" colspan="3">Total Price</th>
+                    <th class="text-right wborder" colspan="2">Total Price</th>
                     <th class="text-right wborder"><?php echo number_format($total_price, 2); ?></th>
+                </tr>
+                <tr>
+                    <th class="text-right wborder" colspan="2">Total Tax (12%)</th>
+                    <th class="text-right wborder"><?php echo number_format($total_tax, 2); ?></th>
+                </tr>
+                <tr>
+                    <th class="text-right wborder" colspan="2">Grand Total</th>
+                    <th class="text-right wborder"><?php echo number_format($grand_total, 2); ?></th>
                 </tr>
             </table>
         </tr>
