@@ -29,6 +29,7 @@ $total_price = 0;
 							<th class="text-center">Product Name</th>
 							<th class="text-center">Quantity</th>
 							<th class="text-center">Price</th>
+							<th class="text-center">Tax</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -39,11 +40,13 @@ $total_price = 0;
 							$total_qty += $row['qty'];
 							$price = $other_details['price'];
 							$total_price += $price * $row['qty'];
+							$tax = $row['tax'] * 100;
 						?>
 							<tr>
 								<td class="text-center"><?php echo $product['name'] ?></td>
 								<td class="text-center"><?php echo $row['qty'] ?></td>
 								<td class="text-center"><?php echo $price ?></td>
+								<td class="text-center"><?php echo number_format($tax, 2) . '%'; ?></td>
 							</tr>
 						<?php endwhile; ?>
 					</tbody>

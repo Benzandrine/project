@@ -62,10 +62,6 @@ if ($supplier_id) {
 									<input type="number" class="form-control text-right" step="any" id="price" >
 								</div>
 								<div class="col-md-3">
-									<label class="control-label">Tax (12%)</label>
-									<input type="number" class="form-control text-right" step="any" id="tax" value="12" readonly>
-								</div>
-								<div class="col-md-3">
 									<label class="control-label">&nbsp</label>
 									<button class="btn btn-block btn-sm btn-primary" type="button" id="add_list"><i class="fa fa-plus"></i> Add to List</button>
 								</div>
@@ -85,7 +81,8 @@ if ($supplier_id) {
 										<th class="text-center">Qty</th>
 										<th class="text-center">Price</th>
 										<th class="text-center">Amount</th>
-										<th class="text-center">Tax Amount</th>
+										<!-- Removed the Tax Amount column -->
+										<!-- <th class="text-center">Tax Amount</th> -->
 										<th class="text-center"></th>
 									</tr>
 								</thead>
@@ -113,9 +110,6 @@ if ($supplier_id) {
 											<td>
 												<p class="amount text-right"></p>
 											</td>
-											<td>
-												<p class="tax-amount text-right"></p>
-											</td>
 											<td class="text-center">
 												<buttob class="btn btn-sm btn-danger" onclick = "rem_list($(this))"><i class="fa fa-trash"></i></buttob>
 											</td>
@@ -128,6 +122,16 @@ if ($supplier_id) {
 										<th class="text-right" colspan="3">Total</th>
 										<th class="text-right tamount"></th>
 										<th><input type="hidden" name="tamount" value=""></th>
+									</tr>
+									<tr>
+										<th class="text-right" colspan="3">Total Tax</th>
+										<th class="text-right total-tax"></th>
+										<th><input type="hidden" name="ttax" value=""></th>
+									</tr>
+									<tr>
+										<th class="text-right" colspan="3">Grand Total</th>
+										<th class="text-right grand-total"></th>
+										<th><input type="hidden" name="grand_total" value=""></th>
 									</tr>
 								</tfoot>
 							</table>
@@ -159,9 +163,6 @@ if ($supplier_id) {
 		</td>
 		<td>
 			<p class="amount text-right"></p>
-		</td>
-		<td>
-			<p class="tax-amount text-right"></p>
 		</td>
 		<td class="text-center">
 			<buttob class="btn btn-sm btn-danger" onclick = "rem_list($(this))"><i class="fa fa-trash"></i></buttob>
@@ -256,13 +257,16 @@ if ($supplier_id) {
 			amount = amount > 0 ? amount : 0;
 			_this.find('p.amount').html(parseFloat(amount).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
 			
-			var taxAmount = parseFloat(_this.find('.tax-amount').text().replace(/,/g, ''));
-			total += parseFloat(amount);
+			total += amount;
+			var taxAmount = (amount * 0.12);
 			totalTax += taxAmount;
 		});
 		var grandTotal = total + totalTax;
-		$('#list [name="tamount"]').val(grandTotal);
-		$('#list .tamount').html(parseFloat(grandTotal).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
+		$('#list [name="tamount"]').val(total);
+		$('#list .tamount').html(parseFloat(total).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
+		$('#list .total-tax').html(parseFloat(totalTax).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
+		$('#list .grand-total').html(parseFloat(grandTotal).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
+		$('[name="grand_total"]').val(grandTotal);
 	}
 	$('#manage-receiving').submit(function(e){
 		e.preventDefault()
