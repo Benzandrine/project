@@ -122,6 +122,16 @@ if(isset($_GET['id'])){
 										<th class="text-right tamount"></th>
 										<th></th>
 									</tr>
+									<tr>
+										<th class="text-right" colspan="3">Tax (12%)</th>
+										<th class="text-right total-tax"></th>
+										<th><input type="hidden" name="ttax" value=""></th>
+									</tr>
+									<tr>
+										<th class="text-right" colspan="3">Grand Total</th>
+										<th class="text-right grand-total"></th>
+										<th><input type="hidden" name="grand_total" value=""></th>
+									</tr>
 								</tfoot>
 							</table>
 						</div>
@@ -133,7 +143,7 @@ if(isset($_GET['id'])){
 					    <div class="modal-dialog modal-md" role="document">
 					      <div class="modal-content">
 					        <div class="modal-header">
-					        <h5 class="modal-title"></h5>
+					        <h5 class="modal-title">Payment</h5>
 					      </div>
 					      <div class="modal-body">
 					      	<div class="container-fluid">
@@ -152,7 +162,7 @@ if(isset($_GET['id'])){
 					      	</div>
 					      </div>
 					      <div class="modal-footer">
-					        <button type="button" class="btn btn-primary" id='submit' onclick="$('#manage-sales').submit()">Pay</button>
+					        <button type="button" class="btn btn-primary" id='submit' ">Pay</button>
 					        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 					      </div>
 					      </div>
@@ -221,6 +231,8 @@ if(isset($_GET['id'])){
 			end_load();
 			return false;
 		}
+		var grandTotal = parseFloat($('#list .grand-total').text().replace(/,/g, '')) || 0;
+		$('[name="tamount"]').val(grandTotal.toFixed(2));
 		$('#pay_modal').modal('show')
 	})
 	$(document).ready(function(){
@@ -286,17 +298,25 @@ if(isset($_GET['id'])){
 			})
 		
 	})
-	function calculate_total(){
+	function calculate_total() {
 		var total = 0;
-		$('#list tbody').find('.item-row').each(function(){
-			var _this = $(this).closest('tr')
-		var amount = parseFloat(_this.find('[name="qty[]"]').val()) * parseFloat(_this.find('[name="price[]"]').val());
-		amount = amount > 0 ? amount :0;
-		_this.find('p.amount').html(parseFloat(amount).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}))
-		total+=parseFloat(amount);
-		})
-		$('[name="tamount"]').val(total)
-		$('#list .tamount').html(parseFloat(total).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}))
+		var totalTax = 0;
+		$('#list tbody').find('.item-row').each(function() {
+			var _this = $(this).closest('tr');
+			var qty = parseFloat(_this.find('[name="qty[]"]').val()) || 0;
+			var price = parseFloat(_this.find('[name="price[]"]').val()) || 0;
+			var amount = qty * price;
+			amount = amount > 0 ? amount : 0;
+			_this.find('p.amount').html(parseFloat(amount).toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2, minimumFractionDigits: 2 }));
+			total += amount;
+		});
+		totalTax = total * 0.12;
+		var grandTotal = total + totalTax;
+
+		$('#list .tamount').html(parseFloat(total).toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2, minimumFractionDigits: 2 }));
+		$('#list .total-tax').html(parseFloat(totalTax).toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2, minimumFractionDigits: 2 }));
+		$('#list .grand-total').html(parseFloat(grandTotal).toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2, minimumFractionDigits: 2 }));
+		$('[name="grand_total"]').val(grandTotal);
 	}
 	$('[name="amount_tendered"]').keyup(function(){
 		var tendered = $(this).val();
@@ -312,6 +332,7 @@ if(isset($_GET['id'])){
 			end_load();
 			return false;
 		}
+		console.log("");
 		$.ajax({
 			url:'ajax.php?action=save_sales',
 		    method: 'POST',
@@ -328,4 +349,23 @@ if(isset($_GET['id'])){
 			}
 		})
 	})
+	$('#submit').click(function(e) {
+		e.preventDefault(); // Prevent default form submission
+
+		var tendered = parseFloat($('[name="amount_tendered"]').val()) || 0;
+		var totalAmount = parseFloat($('[name="tamount"]').val()) || 0;
+		var change = parseFloat($('[name="change"]').val()) || 0;
+
+		// Debugging logs
+		console.log("Tendered: ", tendered, "Total Amount: ", totalAmount, "Change: ", change);
+
+		// Check if the amount tendered is less than the total amount or if the change is negative
+		if (tendered < totalAmount || change < 0) {
+			alert_toast("Amount tendered is insufficient.", 'danger');
+			return false; // Prevent form submission
+		}
+
+		console.log("Submitting form...");
+		$('#manage-sales').submit(); // Proceed with form submission
+	});
 </script>

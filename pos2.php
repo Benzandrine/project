@@ -2,6 +2,8 @@
 
 if (isset($_GET['id'])) {
     $qry = $conn->query("SELECT * FROM sales_list WHERE id=" . $_GET['id'])->fetch_array();
+    $amount_tendered = $qry['amount_tendered'];
+    $amount_change = $qry['amount_change'];
     foreach ($qry as $k => $val) {
         $$k = $val;
     }
@@ -116,6 +118,26 @@ $customer_id = isset($_GET['customer_id']) ? $_GET['customer_id'] : 0;
 										<th class="text-right tamount"></th>
 										<th></th>
 									</tr>
+									<tr>
+										<th class="text-right" colspan="3">Tax (12%)</th>
+										<th class="text-right tax-amount"></th>
+										<th></th>
+									</tr>
+									<tr>
+										<th class="text-right" colspan="3">Grand Total</th>
+										<th class="text-right grand-total"></th>
+										<th></th>
+									</tr>
+									<tr>
+										<th class="text-right" colspan="3">Amount Tendered</th>
+										<th class="text-right"><?php echo number_format($amount_tendered, 2); ?></th>
+										<th></th>
+									</tr>
+									<tr>
+										<th class="text-right" colspan="3">Amount Change</th>
+										<th class="text-right"><?php echo number_format($amount_change, 2); ?></th>
+										<th></th>
+									</tr>
 								</tfoot>
 							</table>
 						</div>
@@ -169,8 +191,15 @@ $customer_id = isset($_GET['customer_id']) ? $_GET['customer_id'] : 0;
 		_this.find('p.amount').html(parseFloat(amount).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}))
 		total+=parseFloat(amount);
 		})
+		var tax = total * 0.12; // Calculate 12% tax
+		var grandTotal = total + tax; // Calculate grand total
+		
 		$('[name="tamount"]').val(total)
-		$('#list .tamount').html(parseFloat(total).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}))
+		$('#list .tamount').html(parseFloat(total).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
+		
+		// Update tax and grand total in the footer
+		$('#list .tax-amount').html(parseFloat(tax).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
+		$('#list .grand-total').html(parseFloat(grandTotal).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
 	}
 	
 </script>

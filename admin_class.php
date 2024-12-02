@@ -314,7 +314,7 @@ Class Action {
 			}
 			$data .= ", ref_no = '$ref_no' ";
 			$save = $this->db->query("INSERT INTO sales_list set ".$data);
-			$id =$this->db->insert_id;
+			$id = $this->db->insert_id;
 			foreach($product_id as $k => $v){
 				$data = " form_id = '$id' ";
 				$data .= ", product_id = '$product_id[$k]' ";
@@ -324,6 +324,7 @@ Class Action {
 				$details = json_encode(array('price'=>$price[$k],'qty'=>$qty[$k]));
 				$data .= ", other_details = '$details' ";
 				$data .= ", remarks = 'Stock out from Sales-".$ref_no."' ";
+				$data .= ", tax = '0.12' ";
 
 				$save2[]= $this->db->query("INSERT INTO inventory set ".$data);
 			}
@@ -343,6 +344,7 @@ Class Action {
 				$details = json_encode(array('price'=>$price[$k],'qty'=>$qty[$k]));
 				$data .= ", other_details = '$details' ";
 				$data .= ", remarks = 'Stock out from Sales-".$ref_no."' ";
+				$data .= ", tax = '0.12' ";
 
 				if(!empty($inv_id[$k])){
 					$save2[]= $this->db->query("UPDATE inventory set ".$data." where id=".$inv_id[$k]);
