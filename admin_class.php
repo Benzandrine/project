@@ -195,8 +195,9 @@ Class Action {
 	function save_receiving(){
 		extract($_POST);
 		$data = " supplier_id = '$supplier_id' ";
-		$data .= ", total_amount = '$tamount' ";
-		
+		$data .= ", total_amount = '$grand_total' ";
+		$data .= ", tax = '0.12' ";
+
 		if(empty($id)){
 			$ref_no = sprintf("%'.08d\n", $ref_no);
 			$i = 1;
@@ -212,7 +213,7 @@ Class Action {
 			}
 			$data .= ", ref_no = '$ref_no' ";
 			$save = $this->db->query("INSERT INTO receiving_list set ".$data);
-			$id =$this->db->insert_id;
+			$id = $this->db->insert_id;
 			foreach($product_id as $k => $v){
 				$data = " form_id = '$id' ";
 				$data .= ", product_id = '$product_id[$k]' ";
@@ -242,16 +243,14 @@ Class Action {
 				$data .= ", other_details = '$details' ";
 				$data .= ", remarks = 'Stock from Receiving-".$ref_no."' ";
 				if(!empty($inv_id[$k])){
-									$save2[]= $this->db->query("UPDATE inventory set ".$data." where id=".$inv_id[$k]);
+					$save2[]= $this->db->query("UPDATE inventory set ".$data." where id=".$inv_id[$k]);
 				}else{
 					$save2[]= $this->db->query("INSERT INTO inventory set ".$data);
 				}
 			}
 			if(isset($save2)){
-				
 				return 1;
 			}
-
 		}
 	}
 

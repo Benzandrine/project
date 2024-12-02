@@ -4,7 +4,7 @@ if (isset($_GET['id'])) {
     $receiving_id = $_GET['id'];
     $receiving = $conn->query("SELECT * FROM receiving_list WHERE id=" . $receiving_id)->fetch_assoc();
     $supplier_id = $receiving['supplier_id'];
-    $supplier = $conn->query("SELECT supplier_name FROM supplier_list WHERE id=" . $supplier_id)->fetch_assoc();
+    $supplier = $conn->query("SELECT supplier_name, address, contact FROM supplier_list WHERE id=" . $supplier_id)->fetch_assoc();
     $inv = $conn->query("SELECT * FROM inventory WHERE type=1 AND form_id=" . $receiving_id);
 }
 
@@ -21,6 +21,8 @@ $total_price = 0;
 				<div class="row">
 					<div class="col-md-6">
 						<p><strong>Supplier Name:</strong> <?php echo $supplier['supplier_name']; ?></p>
+						<p><strong>Supplier Address:</strong> <?php echo $supplier['address']; ?></p>
+						<p><strong>Contact Number:</strong> <?php echo $supplier['contact']; ?></p>
 					</div>
 				</div>
 				<table class="table table-bordered">
@@ -29,7 +31,6 @@ $total_price = 0;
 							<th class="text-center">Product Name</th>
 							<th class="text-center">Quantity</th>
 							<th class="text-center">Price</th>
-							<th class="text-center">Tax</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -40,13 +41,11 @@ $total_price = 0;
 							$total_qty += $row['qty'];
 							$price = $other_details['price'];
 							$total_price += $price * $row['qty'];
-							$tax = $row['tax'] * 100;
 						?>
 							<tr>
 								<td class="text-center"><?php echo $product['name'] ?></td>
 								<td class="text-center"><?php echo $row['qty'] ?></td>
 								<td class="text-center"><?php echo $price ?></td>
-								<td class="text-center"><?php echo number_format($tax, 2) . '%'; ?></td>
 							</tr>
 						<?php endwhile; ?>
 					</tbody>
@@ -59,6 +58,20 @@ $total_price = 0;
 						<tr>
 							<th class="text-right">Total Price</th>
 							<th class="text-center" colspan="2"><?php echo number_format($total_price, 2); ?></th>
+						</tr>
+						<tr>
+							<th class="text-right">VAT (12%)</th>
+							<th class="text-center" colspan="2">
+								<?php 
+								$tax_percentage = $receiving['tax'] * 100; // Get tax percentage from receiving_list
+								$tax_amount = $total_price * ($receiving['tax']); // Calculate tax amount
+								echo number_format($tax_amount, 2); 
+								?>
+							</th>
+						</tr>
+						<tr>
+							<th class="text-right">Grand Total</th>
+							<th class="text-center" colspan="2"><?php echo number_format($total_price + $tax_amount, 2); ?></th>
 						</tr>
 					</tfoot>
 				</table>

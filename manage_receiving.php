@@ -11,10 +11,15 @@ if(isset($_GET['id'])){
 // Fetch supplier name based on supplier_id from URL
 $supplier_id = isset($_GET['supplier_id']) ? $_GET['supplier_id'] : '';
 $supplier_name = '';
+$supplier_address = '';
+$supplier_contact = '';
 if ($supplier_id) {
-    $supplier_query = $conn->query("SELECT supplier_name FROM supplier_list WHERE id = $supplier_id");
+    $supplier_query = $conn->query("SELECT supplier_name, address, contact FROM supplier_list WHERE id = $supplier_id");
     if ($supplier_query->num_rows > 0) {
-        $supplier_name = $supplier_query->fetch_assoc()['supplier_name'];
+        $supplier_data = $supplier_query->fetch_assoc();
+        $supplier_name = $supplier_data['supplier_name'];
+        $supplier_address = $supplier_data['address'];
+        $supplier_contact = $supplier_data['contact'];
     }
 }
 
@@ -35,6 +40,7 @@ if ($supplier_id) {
 			</div>
 			<div class="card-body">
 				<form action="" id="manage-receiving">
+				<input type="hidden" name="supplier_id" value="<?php echo isset($supplier_id) ? $supplier_id : ''; ?>">
 					<input type="hidden" name="id" value="<?php echo isset($_GET['id']) ? $_GET['id'] : '' ?>">
 					<input type="hidden" name="ref_no" value="<?php echo isset($ref_no) ? $ref_no : '' ?>">
 					<div class="col-md-12">
@@ -42,6 +48,16 @@ if ($supplier_id) {
 							<div class="form-group col-md-5">
 								<label class="control-label">Supplier</label>
 								<input type="text" class="form-control" value="<?php echo $supplier_name; ?>" readonly>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-6">
+								<label class="control-label">Supplier Address</label>
+								<input type="text" class="form-control" value="<?php echo $supplier_address; ?>" readonly>
+							</div><br>
+							<div class="col-md-6">
+								<label class="control-label">Contact Number</label>
+								<input type="text" class="form-control" value="<?php echo $supplier_contact; ?>" readonly>
 							</div>
 						</div>
 						<hr>
@@ -102,10 +118,10 @@ if ($supplier_id) {
 												<p class="pdesc"><small><i>Description: <b><?php echo $prod[$row['product_id']]['description'] ?></b></i></small></p>
 											</td>
 											<td>
-												<input type="number" min="1" step="any" name="qty[]" value="<?php echo $row['qty'] ?>" class="text-right">
+												<input type="number" min="1" step="any" name="qty[]" value="<?php echo $row['qty'] ?>" class="text-right" readonly>
 											</td>
 											<td>
-												<input type="number" min="1" step="any" name="price[]" value="<?php echo $row['price'] ?>" class="text-right">
+												<input type="number" min="1" step="any" name="price[]" value="<?php echo $row['price'] ?>" class="text-right" readonly>
 											</td>
 											<td>
 												<p class="amount text-right"></p>
@@ -124,7 +140,7 @@ if ($supplier_id) {
 										<th><input type="hidden" name="tamount" value=""></th>
 									</tr>
 									<tr>
-										<th class="text-right" colspan="3">Total Tax</th>
+										<th class="text-right" colspan="3">VAT (12%)</th>
 										<th class="text-right total-tax"></th>
 										<th><input type="hidden" name="ttax" value=""></th>
 									</tr>
