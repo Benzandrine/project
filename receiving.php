@@ -4,6 +4,43 @@
 		<div class="row">
 			<button class="col-md-2 float-right btn btn-primary btn-sm" id="new_receiving"><i class="fa fa-plus"></i> New Receiving</button>
 		</div>
+		<!-- Supplier List Modal -->
+		<div class="modal fade" id="supplierModal" tabindex="-1" role="dialog" aria-labelledby="supplierModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="supplierModalLabel">Select Supplier</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<table class="table table-bordered">
+							<thead>
+								<th class="text-center">ID</th>
+								<th class="text-center">Supplier Name</th>
+								<th class="text-center">Select</th>
+							</thead>
+							<tbody>
+							<?php 
+								$suppliers = $conn->query("SELECT * FROM supplier_list order by supplier_name asc");
+								while($row=$suppliers->fetch_assoc()):
+							?>
+								<tr>
+									<td class="text-center"><?php echo $row['id'] ?></td>
+									<td class=""><?php echo $row['supplier_name'] ?></td>
+									<td class="text-center">
+										<button class="btn btn-sm btn-success select_supplier" data-id="<?php echo $row['id'] ?>">Select</button>
+									</td>
+								</tr>
+							<?php endwhile; ?>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- End of Supplier List Modal -->
 		<div class="row">
 			<div class="col-md-12">
 				<div class="card">
@@ -34,6 +71,7 @@
 									<td class="text-center">
 										<a class="btn btn-sm btn-primary" href="index.php?page=manage_receiving&id=<?php echo $row['id'] ?>">Edit</a>
 										<a class="btn btn-sm btn-danger delete_receiving" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">Delete</a>
+										<a class="btn btn-sm btn-info" href="index.php?page=view_receiving&id=<?php echo $row['id'] ?>">View</a>
 									</td>
 								</tr>
 							<?php endwhile; ?>
@@ -46,11 +84,14 @@
 	</div>
 </div>
 
-
 <script>
 	$('table').dataTable()
 	$('#new_receiving').click(function(){
-		location.href = "index.php?page=manage_receiving"
+		$('#supplierModal').modal('show'); // Show the modal
+	})
+	$('.select_supplier').click(function(){
+		let supplierId = $(this).attr('data-id');
+		location.href = "index.php?page=manage_receiving&supplier_id=" + supplierId; // Redirect with supplier ID
 	})
 	$('.delete_receiving').click(function(){
 		_conf("Are you sure to delete this data?","delete_receiving",[$(this).attr('data-id')])

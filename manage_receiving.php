@@ -6,9 +6,26 @@ if(isset($_GET['id'])){
 		$$k = $val;
 	}
 	$inv = $conn->query("SELECT * FROM inventory where type=1 and form_id=".$_GET['id']);
-
 }
 
+// Fetch supplier name based on supplier_id from URL
+$supplier_id = isset($_GET['supplier_id']) ? $_GET['supplier_id'] : '';
+$supplier_name = '';
+if ($supplier_id) {
+    $supplier_query = $conn->query("SELECT supplier_name FROM supplier_list WHERE id = $supplier_id");
+    if ($supplier_query->num_rows > 0) {
+        $supplier_name = $supplier_query->fetch_assoc()['supplier_name'];
+    }
+}
+
+// Fetch products for the supplier
+$product_options = '';
+if ($supplier_id) {
+    $product_query = $conn->query("SELECT * FROM product_list WHERE supplier = $supplier_id ORDER BY name ASC");
+    while ($row = $product_query->fetch_assoc()) {
+        $product_options .= '<option value="' . $row['id'] . '" data-name="' . $row['name'] . '" data-description="' . $row['description'] . '">' . $row['name'] . ' | ' . $row['sku'] . '</option>';
+    }
+}
 ?>
 <div class="container-fluid">
 	<div class="col-lg-12">
@@ -24,16 +41,7 @@ if(isset($_GET['id'])){
 						<div class="row">
 							<div class="form-group col-md-5">
 								<label class="control-label">Supplier</label>
-								<select name="supplier_id" id="" class="custom-select browser-default select2">
-									<option value=""></option>
-								<?php 
-
-								$supplier = $conn->query("SELECT * FROM supplier_list order by supplier_name asc");
-								while($row=$supplier->fetch_assoc()):
-								?>
-									<option value="<?php echo $row['id'] ?>"><?php echo $row['supplier_name'] ?></option>
-								<?php endwhile; ?>
-								</select>
+								<input type="text" class="form-control" value="<?php echo $supplier_name; ?>" readonly>
 							</div>
 						</div>
 						<hr>
@@ -42,17 +50,7 @@ if(isset($_GET['id'])){
 									<label class="control-label">Product</label>
 									<select name="" id="product" class="custom-select browser-default select2">
 										<option value=""></option>
-									<?php 
-									$cat = $conn->query("SELECT * FROM category_list order by name asc");
-										while($row=$cat->fetch_assoc()):
-											$cat_arr[$row['id']] = $row['name'];
-										endwhile;
-									$product = $conn->query("SELECT * FROM product_list  order by name asc");
-									while($row=$product->fetch_assoc()):
-										$prod[$row['id']] = $row;
-									?>
-										<option value="<?php echo $row['id'] ?>" data-name="<?php echo $row['name'] ?>" data-description="<?php echo $row['description'] ?>"><?php echo $row['name'] . ' | ' . $row['sku'] ?></option>
-									<?php endwhile; ?>
+										<?php echo $product_options; ?>
 									</select>
 								</div>
 								<div class="col-md-2">
@@ -67,8 +65,6 @@ if(isset($_GET['id'])){
 									<label class="control-label">&nbsp</label>
 									<button class="btn btn-block btn-sm btn-primary" type="button" id="add_list"><i class="fa fa-plus"></i> Add to List</button>
 								</div>
-
-
 						</div>
 						<div class="row">
 							<table class="table table-bordered" id="list">

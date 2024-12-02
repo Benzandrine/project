@@ -4,6 +4,43 @@
 		<div class="row">
 			<button class="col-md-2 float-right btn btn-primary btn-sm" id="new_purchase_order"><i class="fa fa-plus"></i> New Purchase Order</button>
 		</div>
+		<!-- Supplier List Modal -->
+		<div class="modal fade" id="supplierModal" tabindex="-1" role="dialog" aria-labelledby="supplierModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="supplierModalLabel">Select Supplier</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<table class="table table-bordered">
+							<thead>
+								<th class="text-center">ID</th>
+								<th class="text-center">Supplier Name</th>
+								<th class="text-center">Select</th>
+							</thead>
+							<tbody>
+							<?php 
+								$suppliers = $conn->query("SELECT * FROM supplier_list order by supplier_name asc");
+								while($row=$suppliers->fetch_assoc()):
+							?>
+								<tr>
+									<td class="text-center"><?php echo $row['id'] ?></td>
+									<td class=""><?php echo $row['supplier_name'] ?></td>
+									<td class="text-center">
+										<button class="btn btn-sm btn-success select_supplier" data-id="<?php echo $row['id'] ?>">Select</button>
+									</td>
+								</tr>
+							<?php endwhile; ?>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- End of Supplier List Modal -->
 		<div class="row">
 			<div class="col-md-12">
 				<div class="card">
@@ -54,7 +91,11 @@
 <script>
 	$('table').dataTable()
 	$('#new_purchase_order').click(function(){
-		location.href = "index.php?page=new_po"
+		$('#supplierModal').modal('show'); // Show the modal
+	})
+	$('.select_supplier').click(function(){
+		let supplierId = $(this).attr('data-id');
+		location.href = "index.php?page=new_po&supplier_id=" + supplierId; // Redirect with supplier ID
 	})
 	$('.delete_sales').click(function(){
 		_conf("Are you sure to delete this data?","delete_sales",[$(this).attr('data-id')])
@@ -76,18 +117,17 @@
 			}
 		})
 	}
-// Print button functionality without PDF save option
-$('.print_receipt').click(function(){
-    let salesId = $(this).attr('data-id');
+	// Print button functionality without PDF save option
+	$('.print_receipt').click(function(){
+		let salesId = $(this).attr('data-id');
 
-    // Open print window for the receipt
-    let newWindow = window.open('print_sales.php?id=' + salesId, '_blank', 'width=700,height=600,scrollbars=yes,resizable=yes');
+		// Open print window for the receipt
+		let newWindow = window.open('print_sales.php?id=' + salesId, '_blank', 'width=700,height=600,scrollbars=yes,resizable=yes');
 
-    // Trigger print dialog once the print page loads
-    newWindow.onload = function () {
-        newWindow.print(); // Open the print dialog
-        setTimeout(() => { newWindow.close(); }, 1500); // Close the window after 1.5 seconds
-    };
-});
-
+		// Trigger print dialog once the print page loads
+		newWindow.onload = function () {
+			newWindow.print(); // Open the print dialog
+			setTimeout(() => { newWindow.close(); }, 1500); // Close the window after 1.5 seconds
+		};
+	});
 </script>

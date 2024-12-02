@@ -1,5 +1,6 @@
 <?php include 'db_connect.php';
-
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 if(isset($_GET['id'])){
 	$qry = $conn->query("SELECT * FROM sales_list where id=".$_GET['id'])->fetch_array();
 	foreach($qry as $k => $val){
@@ -9,7 +10,46 @@ if(isset($_GET['id'])){
 
 }
 
+// Fetch supplier name based on supplier_id from URL
+$supplier_id = isset($_GET['supplier_id']) ? $_GET['supplier_id'] : '';
+$supplier_name = '';
+if ($supplier_id) {
+    $supplier_query = $conn->query("SELECT supplier_name FROM supplier_list WHERE id = $supplier_id");
+    if ($supplier_query->num_rows > 0) {
+        $supplier_name = $supplier_query->fetch_assoc()['supplier_name'];
+    }
+}
+
+// Fetch products for the supplier
+$product_options = '';
+if ($supplier_id) {
+    $product_query = $conn->query("SELECT * FROM product_list WHERE supplier = $supplier_id ORDER BY name ASC");
+    while ($row = $product_query->fetch_assoc()) {
+        $product_options .= '<option value="' . $row['id'] . '" data-name="' . $row['name'] . '" data-description="' . $row['description'] . '">' . $row['name'] . ' | ' . $row['sku'] . '</option>';
+    }
+}
 ?>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Function to get URL parameters
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    // Get supplier_id from URL and log it to the console
+    var supplierId = getUrlParameter('supplier_id');
+    if (supplierId) {
+        console.log("Supplier ID:", supplierId);
+    }
+});
+</script>
+    <!-- Include Select2 CSS and JS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <div class="container-fluid">
 	<div class="col-lg-12">
 		<div class="card">
@@ -24,16 +64,7 @@ if(isset($_GET['id'])){
 						<div class="row">
 							<div class="form-group col-md-5">
 								<label class="control-label">Supplier</label>
-								<select name="customer_id" id="" class="custom-select browser-default select2">
-									<option value="0" selected="">Supplier 1</option>
-								<?php 
-
-								$customer = $conn->query("SELECT * FROM supplier_list order by supplier_name asc");
-								while($row=$customer->fetch_assoc()):
-								?>
-									<option value="<?php echo $row['id'] ?>"><?php echo $row['supplier_name'] ?></option>
-								<?php endwhile; ?>
-								</select>
+								<input type="text" class="form-control" value="<?php echo $supplier_name; ?>" readonly>
 							</div>
 						</div>
 						<hr>
@@ -42,17 +73,7 @@ if(isset($_GET['id'])){
 									<label class="control-label">Product</label>
 									<select name="" id="product" class="custom-select browser-default select2">
 										<option value=""></option>
-									<?php 
-									$cat = $conn->query("SELECT * FROM category_list order by name asc");
-										while($row=$cat->fetch_assoc()):
-											$cat_arr[$row['id']] = $row['name'];
-										endwhile;
-									$product = $conn->query("SELECT * FROM product_list  order by name asc");
-									while($row=$product->fetch_assoc()):
-										$prod[$row['id']] = $row;
-									?>
-										<option value="<?php echo $row['id'] ?>" data-name="<?php echo $row['name'] ?>" data-description="<?php echo $row['description'] ?>"><?php echo $row['name'] . ' | ' . $row['sku'] ?></option>
-									<?php endwhile; ?>
+										<?php echo $product_options; ?>
 									</select>
 								</div>
 								<div class="col-md-2">
@@ -126,7 +147,7 @@ if(isset($_GET['id'])){
 							</table>
 						</div>
 						<div class="row">
-							<button class="btn btn-primary btn-sm btn-block float-right " type="button" id="pay">Pay</button>
+							<button class="btn btn-primary btn-sm btn-block float-right " type="button" id="pay">Purchase</button>
 						</div>
 					</div>
 					<div class="modal fade" id="pay_modal" role='dialog'>
@@ -152,7 +173,7 @@ if(isset($_GET['id'])){
 					      	</div>
 					      </div>
 					      <div class="modal-footer">
-					        <button type="button" class="btn btn-primary" id='submit' onclick="$('#manage-sales').submit()">Pay</button>
+					        <button type="button" class="btn btn-primary" id='submit' onclick="$('#manage-sales').submit()">Purchase</button>
 					        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 					      </div>
 					      </div>
@@ -215,6 +236,46 @@ if(isset($_GET['id'])){
 	 	placeholder:"Please select here",
 	 	width:"100%"
 	})
+
+	// Add event listener for supplier dropdown change
+	$('[name="customer_id"]').change(function(){
+		var supplier_id = $(this).val();
+		console.log("Supplier ID selected:", supplier_id);
+
+		// Log the data being sent to the server
+		console.log("Data sent to server:", {supplier_id: supplier_id});
+
+		$.ajax({
+			url: 'ajax.php?action=get_products_by_supplier',
+			method: 'POST',
+			data: {supplier_id: supplier_id},
+			success: function(resp){
+				try {
+					resp = JSON.parse(resp);
+					if (resp.error) {
+						console.error("Error from server:", resp.error);
+					} else {
+						var productDropdown = $('#product');
+						productDropdown.empty(); // Clear existing options
+						productDropdown.append('<option value=""></option>'); // Add default empty option
+						resp.forEach(function(product){
+							productDropdown.append('<option value="'+product.id+'" data-name="'+product.name+'" data-description="'+product.description+'">'+product.name+' | '+product.sku+'</option>');
+						});
+						productDropdown.select2({
+							placeholder: "Please select here",
+							width: "100%"
+						});
+					}
+				} catch (e) {
+					console.error("Failed to parse JSON response:", e);
+				}
+			},
+			error: function(xhr, status, error) {
+				console.error("AJAX Error:", status, error);
+			}
+		});
+	});
+
 	$('#pay').click(function(){
 		if($("#list .item-row").length <= 0){
 			alert_toast("Please insert atleast 1 item first.",'danger');
@@ -329,3 +390,8 @@ if(isset($_GET['id'])){
 		})
 	})
 </script>
+<!-- Include Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Include Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

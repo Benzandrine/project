@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 ob_start();
 $action = $_GET['action'];
 include 'admin_class.php';
@@ -112,5 +115,35 @@ if($action == "delete_sales"){
 	$save = $crud->delete_sales();
 	if($save)
 		echo $save;
+}
+
+if(isset($_POST['action']) && $_POST['action'] == 'get_products_by_supplier'){
+    $supplier_id = 1;
+    
+    // Log the supplier ID for debugging
+    error_log("Supplier ID selected: " . $supplier_id);
+
+    $products = $conn->query("SELECT * FROM product_list WHERE supplier = $supplier_id ORDER BY name ASC");
+
+    if (!$products) {
+        $error_message = 'Database query failed: ' . $conn->error;
+        error_log($error_message); // Log the error
+        echo json_encode(['error' => $error_message]);
+        exit;
+    }
+
+    $product_list = [];
+    while($row = $products->fetch_assoc()){
+        $product_list[] = $row;
+    }
+
+    if (empty($product_list)) {
+        $error_message = 'No products found for this supplier.';
+        error_log($error_message); // Log the error
+        echo json_encode(['error' => $error_message]);
+        exit;
+    }
+
+    echo json_encode($product_list);
 }
 
