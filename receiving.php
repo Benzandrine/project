@@ -69,7 +69,7 @@
 									<td class=""><?php echo $row['ref_no'] ?></td>
 									<td class=""><?php echo isset($sup_arr[$row['supplier_id']])? $sup_arr[$row['supplier_id']] :'N/A' ?></td>
 									<td class="text-center">
-										<a class="btn btn-sm btn-primary" href="index.php?page=manage_receiving&id=<?php echo $row['id'] ?>">Edit</a>
+										
 										<a class="btn btn-sm btn-danger delete_receiving" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">Delete</a>
 										<a class="btn btn-sm btn-info" href="index.php?page=view_receiving&id=<?php echo $row['id'] ?>">View</a>
 									</td>
