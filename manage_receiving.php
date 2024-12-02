@@ -62,6 +62,10 @@ if ($supplier_id) {
 									<input type="number" class="form-control text-right" step="any" id="price" >
 								</div>
 								<div class="col-md-3">
+									<label class="control-label">Tax (12%)</label>
+									<input type="number" class="form-control text-right" step="any" id="tax" value="12" readonly>
+								</div>
+								<div class="col-md-3">
 									<label class="control-label">&nbsp</label>
 									<button class="btn btn-block btn-sm btn-primary" type="button" id="add_list"><i class="fa fa-plus"></i> Add to List</button>
 								</div>
@@ -81,6 +85,7 @@ if ($supplier_id) {
 										<th class="text-center">Qty</th>
 										<th class="text-center">Price</th>
 										<th class="text-center">Amount</th>
+										<th class="text-center">Tax Amount</th>
 										<th class="text-center"></th>
 									</tr>
 								</thead>
@@ -107,6 +112,9 @@ if ($supplier_id) {
 											</td>
 											<td>
 												<p class="amount text-right"></p>
+											</td>
+											<td>
+												<p class="tax-amount text-right"></p>
 											</td>
 											<td class="text-center">
 												<buttob class="btn btn-sm btn-danger" onclick = "rem_list($(this))"><i class="fa fa-trash"></i></buttob>
@@ -151,6 +159,9 @@ if ($supplier_id) {
 		</td>
 		<td>
 			<p class="amount text-right"></p>
+		</td>
+		<td>
+			<p class="tax-amount text-right"></p>
 		</td>
 		<td class="text-center">
 			<buttob class="btn btn-sm btn-danger" onclick = "rem_list($(this))"><i class="fa fa-trash"></i></buttob>
@@ -220,7 +231,10 @@ if ($supplier_id) {
 		tr.find('[name="qty[]"]').val(qty)
 		tr.find('[name="price[]"]').val(price)
 		var amount = parseFloat(price) * parseFloat(qty);
-		tr.find('.amount').html(parseFloat(amount).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}))
+		var tax = (amount * 0.12);
+		var totalAmount = amount + tax;
+		tr.find('.amount').html(parseFloat(totalAmount).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}))
+		tr.find('.tax-amount').html(parseFloat(tax).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}))
 		$('#list tbody').append(tr)
 		calculate_total()
 		$('[name="qty[]"],[name="price[]"]').keyup(function(){
@@ -235,15 +249,20 @@ if ($supplier_id) {
 	})
 	function calculate_total(){
 		var total = 0;
+		var totalTax = 0;
 		$('#list tbody').find('.item-row').each(function(){
-			var _this = $(this).closest('tr')
-		var amount = parseFloat(_this.find('[name="qty[]"]').val()) * parseFloat(_this.find('[name="price[]"]').val());
-		amount = amount > 0 ? amount :0;
-		_this.find('p.amount').html(parseFloat(amount).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}))
-		total+=parseFloat(amount);
-		})
-		$('#list [name="tamount"]').val(total)
-		$('#list .tamount').html(parseFloat(total).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}))
+			var _this = $(this).closest('tr');
+			var amount = parseFloat(_this.find('[name="qty[]"]').val()) * parseFloat(_this.find('[name="price[]"]').val());
+			amount = amount > 0 ? amount : 0;
+			_this.find('p.amount').html(parseFloat(amount).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
+			
+			var taxAmount = parseFloat(_this.find('.tax-amount').text().replace(/,/g, ''));
+			total += parseFloat(amount);
+			totalTax += taxAmount;
+		});
+		var grandTotal = total + totalTax;
+		$('#list [name="tamount"]').val(grandTotal);
+		$('#list .tamount').html(parseFloat(grandTotal).toLocaleString('en-US',{style:'decimal',maximumFractionDigits:2,minimumFractionDigits:2}));
 	}
 	$('#manage-receiving').submit(function(e){
 		e.preventDefault()
