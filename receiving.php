@@ -72,6 +72,7 @@
 										
 										<a class="btn btn-sm btn-danger delete_receiving" href="javascript:void(0)" data-id="<?php echo $row['id'] ?>">Delete</a>
 										<a class="btn btn-sm btn-info" href="index.php?page=view_receiving&id=<?php echo $row['id'] ?>">View</a>
+										<a class="btn btn-sm btn-success preview_pdf" href="javascript:void(0)" data-id="<?php echo $row['id']; ?>"><i class="fa fa-print"></i> Print</a>
 									</td>
 								</tr>
 							<?php endwhile; ?>
@@ -84,7 +85,83 @@
 	</div>
 </div>
 
+<!-- Modal for Preview -->
+<div class="modal fade" id="pdfPreviewModal" tabindex="-1" role="dialog" aria-labelledby="pdfPreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pdfPreviewModalLabel">PDF Preview</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="pdfPreviewBody">
+                <!-- The preview content will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="downloadPdfBtn">Download PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
 <script>
+    // Preview the PDF when the preview button is clicked
+    $('.preview_pdf').click(function() {
+        let receivingId = $(this).attr('data-id');
+
+        // Fetch the content to be previewed (you can use AJAX to fetch the full HTML content of the receipt)
+        $.ajax({
+            url: 'generate_pdf.php', // Assuming this file generates the PDF content
+            method: 'GET',
+            data: { id: receivingId },
+            success: function(response) {
+                // Show the content in the modal
+                $('#pdfPreviewBody').html(response);
+
+                // Open the modal
+                $('#pdfPreviewModal').modal('show');
+                
+                // Clear any previously generated pdf (this is just a precaution, you don't need to generate a pdf yet)
+                $('#downloadPdfBtn').off('click'); // Unbind any previous click event
+            }
+        });
+    });
+
+    // Download the PDF when the "Download PDF" button is clicked
+    $('#downloadPdfBtn').click(function() {
+        // Re-fetch the content (since we are about to generate the PDF)
+        let receivingId = $('.preview_pdf').attr('data-id');
+
+        $.ajax({
+            url: 'generate_pdf.php', // Assuming this file generates the PDF content
+            method: 'GET',
+            data: { id: receivingId },
+            success: function(response) {
+                // Initialize html2pdf for the modal content preview
+                var element = document.getElementById('pdfPreviewBody');
+                var opt = {
+                    margin:       1,
+                    filename:     'preview.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { dpi: 192, letterRendering: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                var pdf = new html2pdf(element, opt);
+
+                // Download the PDF
+                pdf.save();
+
+                // Close the modal
+                $('#pdfPreviewModal').modal('hide');
+            }
+        });
+    });
+
+
 	$('table').dataTable()
 	$('#new_receiving').click(function(){
 		$('#supplierModal').modal('show'); // Show the modal
