@@ -32,14 +32,11 @@
 					<p><b><large>Total Expenses</large></b></p>
 					<hr>
 					<p class="text-right"><b><large><?php
-					// Calculate total expenses
+					// Calculate total expenses from receiving_list
 					$total_expenses = 0;
-					$expenses_query = $conn->query("SELECT other_details FROM inventory WHERE stock_from = 'receiving'");
-					while ($row = $expenses_query->fetch_assoc()) {
-						$other_details = json_decode($row['other_details'], true);
-						if (isset($other_details['price']) && isset($other_details['qty'])) {
-							$total_expenses += $other_details['price'] * $other_details['qty'];
-						}
+					$expenses_query = $conn->query("SELECT SUM(total_amount) as total FROM receiving_list");
+					if ($expenses_query->num_rows > 0) {
+						$total_expenses = $expenses_query->fetch_array()['total'];
 					}
 					echo number_format($total_expenses, 2);
 					?></large></b></p>
@@ -48,14 +45,11 @@
 					<p><b><large>Total Sales</large></b></p>
 					<hr>
 					<p class="text-right"><b><large><?php
-					// Calculate total sales
+					// Calculate total sales from sales_list
 					$total_sales = 0;
-					$sales_query = $conn->query("SELECT other_details FROM inventory WHERE stock_from = 'sales'");
-					while ($row = $sales_query->fetch_assoc()) {
-						$other_details = json_decode($row['other_details'], true);
-						if (isset($other_details['price']) && isset($other_details['qty'])) {
-							$total_sales += $other_details['price'] * $other_details['qty'];
-						}
+					$sales_query = $conn->query("SELECT SUM(total_amount) as total FROM sales_list");
+					if ($sales_query->num_rows > 0) {
+						$total_sales = $sales_query->fetch_array()['total'];
 					}
 					echo number_format($total_sales, 2);
 					?></large></b></p>
